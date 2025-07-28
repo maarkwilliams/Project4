@@ -17,7 +17,13 @@ class Order(models.Model):
     full_name = models.CharField(max_length=50, null=False, blank=False)
     email = models.EmailField(max_length=254, null=False, blank=False)
     phone_number = models.CharField(max_length=20, null=False, blank=False)
-    country = CountryField(blank_label='Country *', null=False, blank=False)
+    country = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True,
+        choices=[('', 'Select Country')] + list(CountryField().choices),
+        default=''
+    )
     postcode = models.CharField(max_length=20, null=True, blank=True)
     town_or_city = models.CharField(max_length=40, null=False, blank=False)
     street_address1 = models.CharField(max_length=80, null=False, blank=False)
@@ -38,8 +44,8 @@ class Order(models.Model):
     
     def update_total(self):
         """
-        Update the total each time an item is added,
-        inc delivery costs.
+        Update grand total each time a line item is added,
+        accounting for delivery costs.
         """
         self.order_total = self.lineitems.aggregate(Sum('lineitem_total'))['lineitem_total__sum'] or 0
         if self.order_total < settings.FREE_DELIVERY_THRESHOLD:
@@ -51,7 +57,8 @@ class Order(models.Model):
     
     def save(self, *args, **kwargs):
         """
-        Set the order number if it hasnt been already
+        Override the original save method to set the order number
+        if it hasn't been set already.
         """
         if not self.order_number:
             self.order_number = self._generate_order_number()
@@ -70,7 +77,8 @@ class OrderLineItem(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Set the lineitem total and update the order total
+        Override the original save method to set the lineitem total
+        and update the order total.
         """
         self.lineitem_total = self.product.price * self.quantity
         super().save(*args, **kwargs)
