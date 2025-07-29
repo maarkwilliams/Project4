@@ -83,6 +83,9 @@ def add_product(request):
         if form.is_valid():
             product = form.save()
             messages.success(request, 'Successfully added product!')
+            print("File name (key in S3):", product.image.name)
+            print("File URL:", product.image.url)
+
             return redirect(reverse('product_detail', args=[product.id]))
         else:
             messages.error(request, 'Failed to add product. Please ensure the form is valid.')
