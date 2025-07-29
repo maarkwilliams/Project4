@@ -61,6 +61,7 @@ def add_to_bag(request, item_id):
     request.session['bag'] = bag
     return redirect(redirect_url)
 
+
 def adjust_bag(request, item_id):
     """
     Adjust the quantity of a product in the shopping bag
