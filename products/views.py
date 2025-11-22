@@ -3,9 +3,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Avg
 from django.db.models.functions import Lower
+from django.utils import timezone
 
 from .models import Product, Category, Review
 from .forms import ProductForm, ReviewForm
+
+from recently_viewed.models import RecentlyViewed
 
 
 def all_products(request):
@@ -75,6 +78,19 @@ def product_detail(request, product_id):
             wishlist__user=request.user,
             product=product
         ).exists()
+
+
+    if request.user.is_authenticated:
+        RecentlyViewed.objects.update_or_create(
+            user=request.user,
+            product=product,
+            defaults={'timestamp': timezone.now()}
+        )
+
+        recent_qs = RecentlyViewed.objects.filter(user=request.user).order_by('-timestamp')
+        if recent_qs.count() > 10:
+            for extra in recent_qs[10:]:
+                extra.delete()
 
     context = {
         'product': product,

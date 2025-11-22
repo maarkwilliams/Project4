@@ -3,8 +3,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import UserProfile
 from .forms import UserProfileForm
-
 from checkout.models import Order
+
+from recently_viewed.models import RecentlyViewed
 
 
 @login_required
@@ -23,10 +24,19 @@ def profile(request):
     else:
         form = UserProfileForm(instance=profile)
 
+
+    recent_items = RecentlyViewed.objects.filter(
+        user=request.user
+    ).select_related("product")[:8]
+
+    orders = profile.orders.all()
+
     template = 'profiles/profile.html'
     context = {
         'form': form,
         'profile': profile,
+        'orders': orders,
+        'recent_items': recent_items,
     }
 
     return render(request, template, context)

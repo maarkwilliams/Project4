@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'storages',
     'wishlist.apps.WishlistConfig',
+    'recently_viewed',
 ]
 
 MIDDLEWARE = [
