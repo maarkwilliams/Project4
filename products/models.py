@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
 
 
 class Category(models.Model):
@@ -26,9 +27,11 @@ class Product(models.Model):
     name = models.CharField(max_length=254)
     description = models.TextField()
     has_sizes = models.BooleanField(default=False, null=True, blank=True)
-    price = models.DecimalField(max_digits=6, decimal_places=2, validators=[
-        MinValueValidator(0)
-    ])
+    price = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(0.01)]
+    )
     rating = models.DecimalField(
         max_digits=3, decimal_places=1, null=True, blank=True
     )
@@ -37,6 +40,13 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+
+        if self.description and len(self.description.strip()) < 10:
+            raise ValidationError({
+                "description": "Description must be at least 10 characters long."
+            })
 
     @property
     def average_rating(self):
@@ -68,6 +78,12 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-created_on']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['product', 'user'],
+                name='unique_review_per_product_per_user'
+            )
+        ]
 
     def __str__(self):
         return f"Review of {self.product.name} by {self.user.username}"
