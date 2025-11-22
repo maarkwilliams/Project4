@@ -1,13 +1,15 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block page-header %}
+{% block body_class %}homepage-background{% endblock %}
+
+{% block page_header %}
     <div class="container header-container">
         <div class="row">
             <div class="col"></div>
         </div>
     </div>
-{% endblock %}
+{% endblock page_header %}
 
 {% block content %}
 <div class="container h-100">
@@ -22,4 +24,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock content %}

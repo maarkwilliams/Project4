@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'django_countries',
     'crispy_forms',
     'storages',
+    'wishlist.apps.WishlistConfig',
 ]
 
 MIDDLEWARE = [

@@ -66,13 +66,21 @@ def product_detail(request, product_id):
     """ A view to show individual product details """
 
     product = get_object_or_404(Product, pk=product_id)
-
     reviews = product.reviews.all().order_by('-created_on')
+
+    in_wishlist = False
+    if request.user.is_authenticated:
+        from wishlist.models import WishlistItem
+        in_wishlist = WishlistItem.objects.filter(
+            wishlist__user=request.user,
+            product=product
+        ).exists()
 
     context = {
         'product': product,
         'reviews': reviews,
         'form': ReviewForm(),
+        'in_wishlist': in_wishlist,
     }
 
     return render(request, 'products/product_detail.html', context)
