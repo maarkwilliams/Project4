@@ -9,8 +9,9 @@ def wishlist_view(request):
     items = wishlist.items.all()
 
     return render(request, "wishlist/wishlist.html", {
-        "items": items
+    "items": items
     })
+
 
 
 @login_required
