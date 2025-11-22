@@ -59,9 +59,9 @@ The application includes different user roles:
 | Admin | Manage customer orders | 5 | 5 | ✅ |
 | Admin | View and manage user accounts | 4 | 4 | ✅ |
 | All | Responsive design for mobile/tablet | 5 | 5 | ✅ |
+| All | Wishlist or save items | 5 | 5 | ✅ |
 | All | View featured collections or sale items | 3 | 4 | ❌ |
 | All | Leave product reviews | 3 | 3 | ❌ |
-| All | Wishlist or save items | 3 | 3 | ❌ |
 | All | Share products via social media | 2 | 3 | ❌ |
 
 ## Structure Plane
@@ -91,46 +91,7 @@ The application includes different user roles:
 | 19 | All | Create a wishlist *(Future Feature)* | Save items for later purchase |
 | 20 | All | Share products via social media *(Future Feature)* | Let friends know about great finds |
 
-## Database Schema
-
-For this project, I’ve chosen to use a relational database (PostgreSQL for production and SQLite for development) because it provides the flexibility, robust relationships, and normalisation needed to efficiently manage data for the ecommerce platform.
-
-The application handles multiple types of data, including users, products, categories, orders, and reviews. Django’s built-in user model and ORM are ideal for managing these relationships, such as one-to-many (user to orders), many-to-many (products and categories), and foreign key relationships.
-
-### Normalisation Decisions
-
-To improve data normalisation and avoid redundancy, I made the following design choices:
-
-- **User Profile Information**: Rather than altering Django’s default User model, I created a separate Profile model linked via a one-to-one relationship. This keeps the user model clean while storing additional details such as shipping address, phone number, and profile picture.
-
-- **Product Images with AWS S3**: Product images are stored remotely on AWS S3, with only their URLs saved in the database. This setup optimizes storage, delivery speed, and scalability.
-
-- **Orders and Order Items**: Orders are modeled separately from products using an intermediate OrderItem model. This avoids duplication and allows a single order to include multiple products with specified quantities.
-
-- **Shopping Bag (Cart)**: The shopping bag is managed through a dedicated model that tracks products added by the user, their quantities, and subtotal amounts. This allows users to modify their selection prior to checkout.
-
-- **Checkout Process**: The checkout workflow captures user information, shipping details, payment status, and finalizes orders, connecting seamlessly with the order models.
-
-- **Categories**: Products are associated with one or more categories via a many-to-many relationship, enabling flexible product filtering and navigation.
-
-- **Profile Management**: Users can view and update their profile information, including contact details and order history, enhancing personalization and account control.
-
-- **Product Management**: Product details such as title, description, price, stock availability, and images are stored with appropriate relationships to categories and reviews.
-
-### Entity Relationship Overview
-
-Here is a summary of the main models and their relationships in Nothing Special:
-
-- **User**: Django’s built-in user model is extended and managed using Django Allauth for authentication, registration, and account management.
-- **Profile**: Linked one-to-one with the User model; stores additional user-specific information such as shipping address, phone number, and email.
-- **Product**: Represents the items for sale. Each product includes fields like title, description, price, stock quantity, and image URLs stored on AWS S3. Products have a many-to-many relationship with Category for flexible categorization.
-- **Category**: Defines product categories (e.g., Shirts, Jackets, Accessories) with a many-to-many relationship to Product, allowing products to belong to multiple categories.
-- **Order**: Represents a customer purchase, linked to the User who placed it. Contains order metadata such as timestamps, and total amount.
-- **OrderItem**: Intermediate model linking an Order to multiple Product instances, capturing the quantity and price for each product within the order.
-
-### Image Handling in Detail
-
-For product images, when a product is created or updated, the image is uploaded to AWS S3 using Django’s built-in storage integration with boto3 (or a similar S3 client). The URL or file path returned by AWS S3 is saved in the Product model, linking to the image hosted remotely on S3 for efficient and scalable storage and delivery.
+--- 
 
 ### Skeleton Plane
 
@@ -177,6 +138,183 @@ This project does not include any preloaded or static imagery. Instead, product 
 Using ASOS images allows the site to present a diverse and up-to-date product catalog without needing to host a large library of static images. All images are stored remotely on AWS S3 to ensure efficient delivery and scalability.
 
 This approach keeps the project lightweight while providing visually rich content that reflects current fashion trends and styles.
+
+---
+
+# Database Schema & Data Validation
+
+This project uses a relational database architecture to support a scalable, reliable ecommerce platform.  
+PostgreSQL is used for production, while SQLite is used during development.  
+All queries and relationships are managed through Django’s ORM, ensuring strong data integrity and a clean relational design.
+
+---
+
+## Database Design & Normalisation
+
+The schema follows relational database best practices and is normalised to reduce redundancy and improve maintainability.
+
+### **1. User Profile Separation**
+Instead of altering Django’s built-in `User` model, the project uses a separate `UserProfile` linked via a **One-to-One** relationship.  
+This keeps authentication clean and stores additional fields such as:
+
+- Default shipping address  
+- Phone number  
+- Postcode  
+- Country  
+- Order history (reverse relation)
+
+### **2. Media Management with AWS S3**
+Product images are stored on AWS S3, while only the image URL or file path is stored in the database.  
+This improves:
+
+- Storage efficiency  
+- Performance  
+- Scalability  
+
+### **3. Orders & Line Items**
+Orders use an **OrderLineItem** model to represent each product in the order.  
+This ensures:
+
+- A single order can contain multiple products  
+- Accurate tracking of per-item quantities and prices  
+- Clean separation of order metadata and product details  
+
+### **4. Product Categories**
+Products are assigned to a category through a **ForeignKey**, allowing them to be browsed by category without duplicating category data.
+
+### **5. Wishlist Structure**
+Wishlists are implemented via:
+
+- A **One-to-One** relationship between User and Wishlist  
+- A **ForeignKey** relationship between WishlistItem and Product  
+
+This allows users to store items without duplicating product data.
+
+---
+
+# Entity Relationship Overview
+
+### **User**
+- Django’s built-in user model  
+- Connected to:
+  - `UserProfile` (1:1)  
+  - `Order` (1:M)  
+  - `Review` (1:M)  
+  - `Wishlist` (1:1)
+
+### **UserProfile**
+- Stores additional user information  
+- Auto-created using Django signals  
+- Tied to order history  
+
+### **Product**
+- Contains key product info: name, SKU, description, price, rating, image, etc.  
+- Connected to:
+  - `Category` (M:1)  
+  - `Review` (1:M)  
+  - `OrderLineItem` (M:1)  
+  - `WishlistItem` (M:1)  
+
+### **Category**
+- Used for product filtering and navigation  
+- Linked via ForeignKey to products  
+
+### **Order**
+- Stores order and delivery information  
+- Linked to `UserProfile`  
+- Automatically calculates totals and delivery fees  
+
+### **OrderLineItem**
+- Connects an order to individual product entries  
+- Stores quantity and total cost per item  
+
+### **Review**
+- Linked to `Product` and `User`  
+- Stores rating, comment, timestamp  
+- Validates rating range (1-5)  
+
+### **Wishlist & WishlistItem**
+- Wishlist belongs to a user  
+- WishlistItem connects Product → Wishlist  
+
+![Entity Relationship Diagram](/documentation/feautures/project4-database.png)
+
+---
+
+# Data Validation Improvements
+
+Validation is implemented at **both model level and form level**, ensuring data stays clean, accurate, and safe throughout the application.
+
+---
+
+## Model-Level Validation
+
+### **Product**
+- **Price validation:**  
+  `MinValueValidator(0)` prevents negative prices  
+- **Rating validation:**  
+  1–5 rating enforced through `MinValueValidator` and `MaxValueValidator`
+- Optional fields (image, image_url) support flexible content management  
+
+### **Review**
+- Rating strictly validated as an integer between **1 and 5**  
+- Automatically timestamped  
+- Ordered by newest first  
+
+### **Order**
+- Delivery cost, order total, and grand total are **never user-controlled**  
+- Totals are calculated internally for full integrity  
+- Country selection validates against a controlled list  
+
+### **UserProfile**
+- Uses consistent validation rules with the checkout form  
+- Ensures saved user info is clean and complete  
+
+---
+
+## Form-Level Validation
+
+### **Checkout Form**
+- Required fields display an asterisk  
+- Autofocus improves usability  
+- Ensures:
+  - Valid email formats  
+  - Non-empty required fields  
+  - Proper phone number and postcode inputs  
+
+### **User Profile Form**
+- Matches styling and validation from checkout  
+- Prevents users from saving incomplete or malformed profile data  
+
+---
+
+# Combined Validation Workflow
+
+The project uses **layered validation**, meaning data is validated at:
+
+1. **Frontend/UI level** (placeholders, required fields, autofocus)  
+2. **Form level** (cleaned_data, input formatting)  
+3. **Model level** (validators, field constraints)  
+
+This ensures:
+
+- Clean and consistent database records  
+- Friendly error messages for users  
+- Protection against tampered or invalid requests  
+- Reliable order handling and accurate totals  
+
+---
+
+# Benefits of These Validation Improvements
+
+- Prevents invalid product and review data  
+- Ensures secure and correct checkout inputs  
+- Keeps user profiles accurate and complete  
+- Enhances reliability and consistency across all models  
+- Improves the overall user experience  
+- Reduces long-term maintenance effort  
+
+---
 
 ## Features
 
@@ -264,14 +402,6 @@ For more details on the testing process and results, please refer to the [TESTIN
 ### Languages Used
 
 HTML, CSS, JavaScript, Python
-
-### Database Used
-
-For this project, the application uses SQLite as the default database for development, which provides a lightweight and file-based relational database system that is ideal for testing and development environments.
-
-In production, the application is set up to work with PostgreSQL, a robust and scalable relational database system. PostgreSQL is used to handle the data in a more production-ready environment, providing superior performance, reliability, and the ability to scale as the application grows.
-
-The choice of a relational database system ensures that data can be stored with integrity, and complex relationships between entities (such as users, recipes, likes, and comments) can be efficiently managed. Django’s built-in ORM (Object-Relational Mapping) system is used to interact with the database, making data handling straightforward and intuitive.
 
 ### Frameworks Used
 
