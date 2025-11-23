@@ -14,7 +14,10 @@ from profiles.models import UserProfile
 
 phone_validator = RegexValidator(
     regex=r'^\+?[\d\s\-]{7,15}$',
-    message="Enter a valid phone number (7–15 digits, spaces or dashes allowed)."
+    message=(
+        "Enter a valid phone number (7–15 digits, spaces or dashes "
+        "allowed)."
+    ),
 )
 
 postcode_validator = RegexValidator(

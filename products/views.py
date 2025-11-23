@@ -1,18 +1,24 @@
-from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.shortcuts import (
+    render, redirect, reverse, get_object_or_404
+)
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Avg
 from django.db.models.functions import Lower
 from django.utils import timezone
 
-from .models import Product, Category, Review
+from .models import Product, Category
 from .forms import ProductForm, ReviewForm
 
 from recently_viewed.models import RecentlyViewed
+from wishlist.models import WishlistItem
 
 
 def all_products(request):
-    """ A view to show all products, including sorting and search queries """
+    """
+    Display all products with optional sorting, filtering,
+    and search functionality.
+    """
 
     products = Product.objects.all()
     query = None
@@ -21,159 +27,214 @@ def all_products(request):
     direction = None
 
     if request.GET:
-        if 'sort' in request.GET:
-            sortkey = request.GET['sort']
+
+        if "sort" in request.GET:
+            sortkey = request.GET["sort"]
             sort = sortkey
 
-            if sortkey == 'name':
-                products = products.annotate(lower_name=Lower('name'))
-                sortkey = 'lower_name'
+            if sortkey == "name":
+                products = products.annotate(
+                    lower_name=Lower("name")
+                )
+                sortkey = "lower_name"
 
-            if sortkey == 'category':
-                sortkey = 'category__name'
+            if sortkey == "category":
+                sortkey = "category__name"
 
-            if 'direction' in request.GET:
-                direction = request.GET['direction']
-                if direction == 'desc':
-                    sortkey = f'-{sortkey}'
+            if "direction" in request.GET:
+                direction = request.GET["direction"]
+                if direction == "desc":
+                    sortkey = f"-{sortkey}"
 
             products = products.order_by(sortkey)
 
-        if 'category' in request.GET:
-            categories = request.GET['category'].split(',')
-            products = products.filter(category__name__in=categories)
-            categories = Category.objects.filter(name__in=categories)
+        if "category" in request.GET:
+            categories = request.GET["category"].split(",")
+            products = products.filter(
+                category__name__in=categories
+            )
+            categories = Category.objects.filter(
+                name__in=categories
+            )
 
-        if 'q' in request.GET:
-            query = request.GET['q']
+        if "q" in request.GET:
+            query = request.GET["q"]
             if not query:
-                messages.error(request, "You didn't enter any search criteria!")
-                return redirect(reverse('products'))
+                messages.error(
+                    request,
+                    "You didn't enter any search criteria!",
+                )
+                return redirect(reverse("products"))
 
-            queries = Q(name__icontains=query) | Q(description__icontains=query)
+            queries = (
+                Q(name__icontains=query)
+                | Q(description__icontains=query)
+            )
             products = products.filter(queries)
 
-    current_sorting = f'{sort}_{direction}'
+    current_sorting = f"{sort}_{direction}"
 
     context = {
-        'products': products,
-        'search_term': query,
-        'current_categories': categories,
-        'current_sorting': current_sorting,
+        "products": products,
+        "search_term": query,
+        "current_categories": categories,
+        "current_sorting": current_sorting,
     }
 
-    return render(request, 'products/products.html', context)
+    return render(request, "products/products.html", context)
 
 
 def product_detail(request, product_id):
-    """ A view to show individual product details """
+    """
+    Display individual product details, wishlist state,
+    reviews, and store recently viewed products.
+    """
 
     product = get_object_or_404(Product, pk=product_id)
-    reviews = product.reviews.all().order_by('-created_on')
+    reviews = product.reviews.all().order_by("-created_on")
 
     in_wishlist = False
     if request.user.is_authenticated:
-        from wishlist.models import WishlistItem
         in_wishlist = WishlistItem.objects.filter(
             wishlist__user=request.user,
-            product=product
+            product=product,
         ).exists()
-
 
     if request.user.is_authenticated:
         RecentlyViewed.objects.update_or_create(
             user=request.user,
             product=product,
-            defaults={'timestamp': timezone.now()}
+            defaults={"timestamp": timezone.now()},
         )
 
-        recent_qs = RecentlyViewed.objects.filter(user=request.user).order_by('-timestamp')
+        recent_qs = RecentlyViewed.objects.filter(
+            user=request.user
+        ).order_by("-timestamp")
+
         if recent_qs.count() > 10:
             for extra in recent_qs[10:]:
                 extra.delete()
 
     context = {
-        'product': product,
-        'reviews': reviews,
-        'form': ReviewForm(),
-        'in_wishlist': in_wishlist,
+        "product": product,
+        "reviews": reviews,
+        "form": ReviewForm(),
+        "in_wishlist": in_wishlist,
     }
 
-    return render(request, 'products/product_detail.html', context)
+    return render(request, "products/product_detail.html", context)
 
 
 @login_required
 def add_product(request):
-    """ Add a product to the store """
+    """
+    Allow superusers to add new products.
+    """
+
     if not request.user.is_superuser:
-        messages.error(request, 'Sorry, only store owners can do that.')
-        return redirect(reverse('home'))
-    
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
+        messages.error(
+            request,
+            "Sorry, only store owners can do that.",
+        )
+        return redirect(reverse("home"))
+
+    if request.method == "POST":
+        form = ProductForm(
+            request.POST,
+            request.FILES,
+        )
         if form.is_valid():
             product = form.save()
-            messages.success(request, 'Successfully added product!')
-            return redirect(reverse('product_detail', args=[product.id]))
-        else:
-            messages.error(request, 'Failed to add product. Please ensure the form is valid.')
+            messages.success(request, "Successfully added product!")
+            return redirect(
+                reverse("product_detail", args=[product.id])
+            )
+        messages.error(
+            request,
+            "Failed to add product. Please ensure the form "
+            "is valid.",
+        )
     else:
         form = ProductForm()
-        
-    template = 'products/add_product.html'
-    context = {
-        'form': form,
-    }
 
-    return render(request, template, context)
+    return render(
+        request,
+        "products/add_product.html",
+        {"form": form},
+    )
 
 
 @login_required
 def edit_product(request, product_id):
-    """ Edit a product in the store """
+    """
+    Allow superusers to edit an existing product.
+    """
+
     if not request.user.is_superuser:
-        messages.error(request, 'Sorry, only store owners can do that.')
-        return redirect(reverse('home'))
-    
+        messages.error(
+            request,
+            "Sorry, only store owners can do that.",
+        )
+        return redirect(reverse("home"))
+
     product = get_object_or_404(Product, pk=product_id)
 
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
+    if request.method == "POST":
+        form = ProductForm(
+            request.POST,
+            request.FILES,
+            instance=product,
+        )
         if form.is_valid():
             form.save()
-            messages.success(request, 'Successfully updated product!')
-            return redirect(reverse('product_detail', args=[product.id]))
-        else:
-            messages.error(request, 'Failed to update product. Please ensure the form is valid.')
+            messages.success(request, "Product updated!")
+            return redirect(
+                reverse("product_detail", args=[product.id])
+            )
+        messages.error(
+            request,
+            "Failed to update product. Please ensure the form "
+            "is valid.",
+        )
     else:
         form = ProductForm(instance=product)
-        messages.info(request, f'You are editing {product.name}')
+        messages.info(
+            request,
+            f"You are editing {product.name}",
+        )
 
-    template = 'products/edit_product.html'
-    context = {
-        'form': form,
-        'product': product,
-    }
-
-    return render(request, template, context)
+    return render(
+        request,
+        "products/edit_product.html",
+        {"form": form, "product": product},
+    )
 
 
 @login_required
 def delete_product(request, product_id):
-    """ Delete a product from the store """
+    """
+    Allow superusers to delete a product.
+    """
+
     if not request.user.is_superuser:
-        messages.error(request, 'Sorry, only store owners can do that.')
-        return redirect(reverse('home'))
-    
+        messages.error(
+            request,
+            "Sorry, only store owners can do that.",
+        )
+        return redirect(reverse("home"))
+
     product = get_object_or_404(Product, pk=product_id)
     product.delete()
-    messages.success(request, 'Product deleted!')
-    return redirect(reverse('products'))
+    messages.success(request, "Product deleted!")
+
+    return redirect(reverse("products"))
 
 
 @login_required
 def add_review(request, product_id):
-    """ Add a review to a product """
+    """
+    Allow logged-in users to submit a review for a product.
+    """
 
     product = get_object_or_404(Product, id=product_id)
 
@@ -186,17 +247,24 @@ def add_review(request, product_id):
             new_review.user = request.user
             new_review.save()
 
-            avg_rating = product.reviews.aggregate(Avg('rating'))['rating__avg']
+            avg_rating = product.reviews.aggregate(
+                Avg("rating")
+            )["rating__avg"]
+
             product.rating = avg_rating
-            product.save(update_fields=['rating'])
+            product.save(update_fields=["rating"])
 
             messages.success(request, "Thank you for your review!")
-            return redirect('product_detail', product_id=product.id)
+            return redirect(
+                "product_detail",
+                product_id=product.id,
+            )
 
     else:
         form = ReviewForm()
 
-    return render(request, "products/add_review.html", {
-        'product': product,
-        'form': form
-    })
+    return render(
+        request,
+        "products/add_review.html",
+        {"product": product, "form": form},
+    )

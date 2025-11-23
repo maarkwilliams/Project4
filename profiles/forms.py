@@ -1,15 +1,17 @@
 from django import forms
 from django.core.exceptions import ValidationError
+
 from .models import UserProfile
 
 
 class UserProfileForm(forms.ModelForm):
+
     class Meta:
         model = UserProfile
         exclude = ('user',)
 
     def __init__(self, *args, **kwargs):
-        """Add placeholders + Bootstrap classes."""
+        """Add placeholders and Bootstrap classes."""
         super().__init__(*args, **kwargs)
 
         placeholders = {
@@ -22,11 +24,12 @@ class UserProfileForm(forms.ModelForm):
         }
 
         self.fields['default_phone_number'].widget.attrs['autofocus'] = True
+
         for field in self.fields:
             if field != 'default_country':
+                base = placeholders.get(field, '')
                 placeholder = (
-                    f"{placeholders.get(field, '')} *"
-                    if self.fields[field].required else placeholders.get(field, '')
+                    f"{base} *" if self.fields[field].required else base
                 )
                 self.fields[field].widget.attrs['placeholder'] = placeholder
 
@@ -35,22 +38,28 @@ class UserProfileForm(forms.ModelForm):
             )
             self.fields[field].label = False
 
-
     def clean_default_phone_number(self):
+
         phone = self.cleaned_data.get("default_phone_number")
-        if phone and len(phone.replace(" ", "").replace("-", "")) < 7:
-            raise ValidationError("Phone number is too short.")
+        if phone:
+            cleaned = phone.replace(" ", "").replace("-", "")
+            if len(cleaned) < 7:
+                raise ValidationError("Phone number is too short.")
         return phone
 
     def clean_default_postcode(self):
+        """Ensure postcode has a minimum length."""
         postcode = self.cleaned_data.get("default_postcode")
         if postcode and len(postcode) < 3:
-            raise ValidationError("Postcode must be at least 3 characters.")
+            raise ValidationError(
+                "Postcode must be at least 3 characters."
+            )
         return postcode
 
     def clean(self):
         """
-        Must provide at least one address field OR leave all blank.
+        Require full address fields if any address
+        information is being entered.
         """
         cleaned = super().clean()
 
@@ -58,10 +67,13 @@ class UserProfileForm(forms.ModelForm):
         town = cleaned.get("default_town_or_city")
         country = cleaned.get("default_country")
 
-        if addr1 or town or country:
-            if not addr1 or not town or not country:
+        address_fields_filled = any([addr1, town, country])
+
+        if address_fields_filled:
+            if not all([addr1, town, country]):
                 raise ValidationError(
-                    "If entering address info, you must complete Street Address 1, Town/City and Country."
+                    "If entering address info, you must complete "
+                    "Street Address 1, Town/City and Country."
                 )
 
         return cleaned

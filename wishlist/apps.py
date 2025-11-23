@@ -5,9 +5,6 @@ class WishlistConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'wishlist'
 
-
-class WishlistConfig(AppConfig):
-    name = 'wishlist'
-
     def ready(self):
-        import wishlist.signals
+
+        import wishlist.signals  # noqa: F401

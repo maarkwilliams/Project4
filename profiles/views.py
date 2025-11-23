@@ -24,7 +24,6 @@ def profile(request):
     else:
         form = UserProfileForm(instance=profile)
 
-
     recent_items = RecentlyViewed.objects.filter(
         user=request.user
     ).select_related("product")[:8]

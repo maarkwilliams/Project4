@@ -45,7 +45,9 @@ class Product(models.Model):
 
         if self.description and len(self.description.strip()) < 10:
             raise ValidationError({
-                "description": "Description must be at least 10 characters long."
+                "description": (
+                    "Description must be at least 10 characters long."
+                )
             })
 
     @property

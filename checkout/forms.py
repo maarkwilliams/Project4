@@ -40,7 +40,6 @@ class OrderForm(forms.ModelForm):
             self.fields[field].widget.attrs['class'] = 'stripe-style-input'
             self.fields[field].label = False
 
-
     def clean_phone_number(self):
         phone = self.cleaned_data.get("phone_number")
         if phone and len(phone.replace(" ", "").replace("-", "")) < 7:
@@ -64,6 +63,8 @@ class OrderForm(forms.ModelForm):
         country = cleaned_data.get("country")
 
         if not addr1 or not town or not country:
-            raise ValidationError("Please complete the required address fields.")
+            raise ValidationError(
+                "Please complete the required address fields."
+            )
 
         return cleaned_data

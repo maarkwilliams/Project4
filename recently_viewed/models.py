@@ -3,13 +3,22 @@ from django.contrib.auth.models import User
 from products.models import Product
 from django.utils import timezone
 
+
 class RecentlyViewed(models.Model):
     """
     Stores products recently viewed by each user.
-    Each combination of user + product is unique.
+    Each combination of user + product must be unique.
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recent_views")
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="recent_views"
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="recently_viewed_items"
+    )
     timestamp = models.DateTimeField(default=timezone.now)
 
     class Meta:
