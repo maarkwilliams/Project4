@@ -9,11 +9,6 @@ body {
     background: none !important;
 }
 
-.homepage-background {
-    background: url("{{ MEDIA_URL }}homepage_background.jpg") no-repeat center center fixed;
-    background-size: cover;
-}
-
 .no-background {
     background: none !important;
 }

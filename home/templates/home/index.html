@@ -3,6 +3,16 @@
 
 {% block body_class %}homepage-background{% endblock %}
 
+{% block extra_css %}
+<style>
+.homepage-background {
+    background: url("{{ MEDIA_URL }}homepage_background.jpg")
+                no-repeat center center fixed;
+    background-size: cover;
+}
+</style>
+{% endblock %}
+
 {% block page_header %}
     <div class="container header-container">
         <div class="row">
