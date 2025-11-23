@@ -3,15 +3,15 @@ from django.contrib.auth.decorators import login_required
 from products.models import Product
 from .models import Wishlist, WishlistItem
 
+
 @login_required
 def wishlist_view(request):
     wishlist, created = Wishlist.objects.get_or_create(user=request.user)
     items = wishlist.items.all()
 
     return render(request, "wishlist/wishlist.html", {
-    "items": items
+        "items": items
     })
-
 
 
 @login_required

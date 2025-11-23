@@ -2,7 +2,8 @@
 
 ![NothingSpecial Banner](documentation/feautures/nav-bar.png)
 
-Nothing Special is a full-stack e-commerce platform built with Django and Python on the backend, and HTML, CSS, and JavaScript on the frontend.
+Nothing Special is a full-stack e-commerce platform built using Django and Python on the backend, with HTML, CSS, JavaScript, and Bootstrap powering the frontend.
+It delivers a smooth shopping experience through clean UI, robust data handling, and secure payment integration with Stripe.
 
 [Visit NothingSpecial Here](https://nothingspecial-project4-7ae6e31facd5.herokuapp.com/)
 
@@ -12,22 +13,47 @@ Nothing Special is a full-stack e-commerce platform built with Django and Python
 
 ### Strategy Plane
 
-#### **Project Goals**
+#### **Project Overview**
 
-Nothing Special is a Business to Consumer (B2C) web application designed to streamline the online shopping experience for men’s fashion. Whether users are looking for classic wardrobe essentials, trend-forward statement pieces, or a full seasonal refresh, the platform offers a curated and accessible space for all their clothing needs.
+Nothing Special is a Business-to-Consumer (B2C) web application created to provide a seamless online shopping experience for men’s fashion.
+Whether users are browsing staple wardrobe essentials, trend-focused pieces, or full seasonal collections, the platform offers a curated and easy-to-navigate shopping environment.
 
-The primary audience includes fashion-conscious men of all ages who value convenience, style, and quality. From busy professionals seeking timeless office wear to students interested in affordable streetwear, the site aims to serve a broad demographic with diverse tastes and budgets.
+**Target Audience**
 
-The rise of e-commerce, accelerated by changing consumer behaviors and digital-first shopping trends, has created a strong demand for niche, well-designed platforms that focus on user experience and product discovery. According to fashion industry insights, online shopping continues to outpace physical retail, especially in the men’s clothing segment — driven by ease of access, wider variety, and personalized recommendations.
+The platform is designed for fashion-conscious men of all ages who value:
+- Convenience
+- Style
+- Quality
+- A clean, frustration-free shopping experience
 
-This application taps into that trend by offering users the ability to:
+This includes:
+- Busy professionals needing reliable officewear
+- Students looking for streetwear and affordable basics
+- Casual shoppers browsing everyday essentials
+- Style-focused users comparing products and reviews
 
-* Browse and filter a wide range of men's clothing items
-* View detailed product descriptions and images
-* Add items to a shopping cart and proceed through a secure checkout process
-* Register and manage personal accounts with order tracking and purchase history
+**Why This Project?**
 
-As someone interested in fashion and technology, I created this project to bridge the gap between clean design and functional online retail. Nothing Special aims to be more than just a store — it’s a digital destination where shopping for menswear feels simple, stylish, and seamless.
+E-commerce continues to grow rapidly, especially in menswear, where online shopping offers:
+
+- A wider selection than physical retail
+- Easier comparison of products
+- A more personalised shopping journey
+- Convenience for users with busy lifestyles
+
+As someone passionate about both fashion and technology, this project allowed me to combine clean UX design with robust backend functionality, creating a platform where shopping feels simple, intuitive, and visually engaging.
+
+**Core Objectives**
+
+Nothing Special aims to:
+- Provide a streamlined browsing and shopping experience
+- Allow users to securely register, log in, and manage their account
+- Offer product search, filtering, and sorting features
+- Support full checkout functionality with Stripe payments
+- Give users persistent features such as order history, wishlist, and recently viewed items
+- Maintain strong accessibility and responsive design across all devices
+
+The final goal is to create a polished, user-centred e-commerce application that is functional, scalable, and visually appealing—reflecting real-world industry standards.
 
 ## Scope Plane
 
@@ -53,13 +79,14 @@ The application includes different user roles:
 | User | View and manage order history | 4 | 4 | ✅ |
 | User | Update profile and shipping info | 4 | 4 | ✅ |
 | User | Reset password | 5 | 5 | ✅ |
+| User | Recently viewed products | 5 | 5 | ✅ |
+| User | Wishlist or save items | 5 | 5 | ✅ |
 | User | Receive order confirmation and status emails | 4 | 4 | ✅ |
 | Admin | Access Django admin panel | 5 | 5 | ✅ |
 | Admin | Add, edit, and delete products | 5 | 5 | ✅ |
 | Admin | Manage customer orders | 5 | 5 | ✅ |
 | Admin | View and manage user accounts | 4 | 4 | ✅ |
 | All | Responsive design for mobile/tablet | 5 | 5 | ✅ |
-| All | Wishlist or save items | 5 | 5 | ✅ |
 | All | View featured collections or sale items | 3 | 4 | ❌ |
 | All | Leave product reviews | 3 | 3 | ❌ |
 | All | Share products via social media | 2 | 3 | ❌ |
@@ -190,6 +217,16 @@ Wishlists are implemented via:
 
 This allows users to store items without duplicating product data.
 
+
+### **6. Recently Viewed Products**
+The RecentlyViewed model stores a list of products each user has recently interacted with.
+It uses a simple structure:
+- User → Product via ForeignKeys
+- Timestamp to record when the item was last viewed
+- A unique constraint to prevent duplicate entries
+
+This allows the site to display a personalised list of recently viewed items and improves the browsing experience by helping users quickly return to products they were interested in.
+
 ---
 
 # Entity Relationship Overview
@@ -236,6 +273,15 @@ This allows users to store items without duplicating product data.
 ### **Wishlist & WishlistItem**
 - Wishlist belongs to a user  
 - WishlistItem connects Product → Wishlist  
+
+### **Recently Viewed**
+Tracks products a user has recently interacted with
+Connected to:
+- User (M:1)
+- Product (M:1)
+
+Each time a logged-in user views a product, a timestamped entry is recorded.
+The model enforces one record per user–product pair, updating the timestamp rather than creating duplicates.
 
 ![Entity Relationship Diagram](/documentation/feautures/project4-database.png)
 
@@ -286,9 +332,7 @@ Validation is implemented at **both model level and form level**, ensuring data 
 - Matches styling and validation from checkout  
 - Prevents users from saving incomplete or malformed profile data  
 
----
-
-# Combined Validation Workflow
+### Combined Validation Workflow
 
 The project uses **layered validation**, meaning data is validated at:
 
@@ -303,9 +347,7 @@ This ensures:
 - Protection against tampered or invalid requests  
 - Reliable order handling and accurate totals  
 
----
-
-# Benefits of These Validation Improvements
+### Benefits of These Validation Improvements
 
 - Prevents invalid product and review data  
 - Ensures secure and correct checkout inputs  
@@ -330,6 +372,7 @@ This ensures:
 ![Product Details](documentation/feautures/product-detail.png)
 
 **Add Product to Bag**
+
 ![Add To Bag](documentation/feautures/add-to-bag.png)
 
 **Shopping Bag**
@@ -339,16 +382,25 @@ This ensures:
 ![Order Confirmation](documentation/feautures/orderconf.png)
 
 **Add Products**
+
 ![Add To Bag](documentation/feautures/add-product.png)
 
 **Profile**
 ![Profile](documentation/feautures/profile.png)
 
 **Log In**
+
 ![Log In](documentation/feautures/login.png)
 
 **Register**
+
 ![Register](documentation/feautures/register.png)
+
+**Wishlist**
+![Register](documentation/feautures/wishlist.png)
+
+**Recently Viewed**
+![Register](documentation/feautures/recently-viewed.png)
 
 ### Future Implementations
 

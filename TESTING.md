@@ -35,6 +35,7 @@ Since the project is built with Django, the remaining errors and warnings are re
 | Product Html | Pass | [Product Html Validation](documentation/validation/html/product-html.png) |
 | Product Detail Html | Pass | [Product Detail Html Validation](documentation/validation/html/productdetail-html.png)|
 | Profile | Pass | [Profile Html Validation](documentation/validation/html/profile-html.png) |
+| Wishlist Html | Pass | [Wishlist Html Validation](documentation/validation/html/wishlist-html.png) |
 
 ### CSS
 
@@ -78,15 +79,26 @@ Since the project is built with Django, the remaining errors and warnings are re
 | checkout/webhooks.py | Pass | [validation](documentation/validation/python/checkout-webh.png) |
 | checkout/webhooks_handler.py | Pass | [validation](documentation/validation/python/checkout-wh.png) |
 | **Product** |
-| products/forms.py | Pass | [admin.py validation](documentation/validation/python/product-form.png) |
-| products/models.py | Pass | [admin.py validation](documentation/validation/python/product-model.png) |
-| products/urls.py | Pass | [admin.py validation](documentation/validation/python/product-url.png) |
-| products/views.py | Pass | [admin.py validation](documentation/validation/python/product-views.png) |
-| products/admin.py | Pass | [admin.py validation](documentation/validation/python/products-admin.png) |
+| products/forms.py | Pass | [validation](documentation/validation/python/product-form.png) |
+| products/models.py | Pass | [validation](documentation/validation/python/product-model.png) |
+| products/urls.py | Pass | [validation](documentation/validation/python/product-url.png) |
+| products/views.py | Pass | [validation](documentation/validation/python/product-views.png) |
+| products/admin.py | Pass | [validation](documentation/validation/python/products-admin.png) |
 | **Profile** |
-| profiles/forms.py | Pass | [admin.py validation](documentation/validation/python/profile-form.png) |
-| profiles/models.py | Pass | [admin.py validation](documentation/validation/python/profile-model.png) |
-| profiles/views.py | Pass | [admin.py validation](documentation/validation/python/profile-view.png) |
+| profiles/forms.py | Pass | [validation](documentation/validation/python/profile-form.png) |
+| profiles/models.py | Pass | [validation](documentation/validation/python/profile-model.png) |
+| profiles/views.py | Pass | [validation](documentation/validation/python/profile-view.png) |
+| **Wishlist** |
+| wishlist/signals.py | Pass | [validation](documentation/validation/python/wishlist-signals.png) |
+| wishlist/models.py | Pass | [validation](documentation/validation/python/wishlist-models.png) |
+| wishlist/views.py | Pass | [validation](documentation/validation/python/wishlist-views.png) |
+| wishlist/apps.py | Pass | [validation](documentation/validation/python/wishlist-apps.png) |
+| wishlist/tests.py | Pass | [validation](documentation/validation/python/wishlist-test.png) |
+| wishlist/urls.py | Pass | [validation](documentation/validation/python/wishlist-url.png) |
+| **Recently Viewed** |
+| recentlyviewed/apps.py | Pass | [validation](documentation/validation/python/recentlyviewed-apps.png) |
+| recentlyviewed/models.py | Pass | [validation](documentation/validation/python/recentlyviewed-models.png) |
+| recentlyviewed/admin.py | Pass | [validation](documentation/validation/python/recentlyviewed-admin.png) |
 
 ### Lighthouse
 
@@ -104,6 +116,7 @@ I used Google's Lighthouse tool to evaluate the site's performance, accessibilit
 | Log In Page | [Login Desktop Lighthouse Testing](documentation/lighthouse/login-desktop.png) |
 | Register Page | [Register Desktop Lighthouse Testing](documentation/lighthouse/register-desktop.png) |
 | Profile Page | [Profile Desktop Lighthouse Testing](documentation/lighthouse/profile-desktop.png) |
+| Wishlist Page | [Wishlist Desktop Lighthouse Testing](documentation/lighthouse/wishlist-desktop.png) |
 
 #### Mobile Results
 
@@ -117,10 +130,63 @@ I used Google's Lighthouse tool to evaluate the site's performance, accessibilit
 |Log In Page|[Login Mobile Lighthouse Testing](documentation/lighthouse/login-mobile.png)|
 |Register Page|[Register Mobile Lighthouse Testing](documentation/lighthouse/register-mobile.png)|
 |Profile Page|[Profile Mobile Lighthouse Testing](documentation/lighthouse/profile-mobile.png)|
+|Wishlist Page|[Wishlist Mobile Lighthouse Testing](documentation/lighthouse/wishlist-mobile.png)|
+
+## Automated Testing
+
+Automated testing was added to ensure that key features and custom models behave correctly, and to demonstrate test-driven development practices. The tests cover both models and view logic across the Wishlist and Products apps.
+
+Django’s built-in TestCase class was used to create an isolated test database for each test run, ensuring consistent and repeatable results.
+
+### Wishlist App Tests
+
+1. Wishlist View Tests
+
+- The wishlist page loads successfully (status code 200)
+- The correct template is used
+- Users can add an item to their wishlist
+- Items can be successfully removed from the wishlist
+
+2. Wishlist Model Tests
+
+- A WishlistItem correctly links a user’s wishlist to a product
+- Model relationships behave as expected
+
+**Why These Tests Matter**
+
+These tests prove that the custom Wishlist feature works reliably, including the relational behaviour between:
+
+- User
+- Wishlist
+- WishlistItem
+- Product
+
+The automated tests demonstrate proper SDLC practice and validate the originality and stability of the feature.
+
+### Products App Tests
+
+1. Product Model Tests
+
+- Validation prevents negative pricing
+- The custom average_rating property correctly calculates review averages
+
+2. Review Model Tests
+
+- Ratings outside the 1–5 range raise ValidationError
+- Ensures data integrity and prevents invalid review submissions
+
+**Why These Tests Matter**
+
+These tests verify:
+
+- Custom validation logic
+- Custom calculated properties
+- Protection against invalid data entering the database
+- Assessment-required “stricter validation” improvements
+
+--- 
 
 ## Manual Testing
-
-### Testing User Stories
 
 ### Testing User Stories  
 
@@ -137,11 +203,13 @@ I used Google's Lighthouse tool to evaluate the site's performance, accessibilit
 | 9 | User | Update my shipping and personal info | Ensure accurate deliveries | Profile page with editable shipping and contact details stored in user profile model. | [Profile Page](documentation/testing/user-stories/9us.png) |
 | 10 | User | Reset my password | Recover access if I forget my login | Password reset handled via `django-allauth` with email confirmation flow. | [Password Reset](documentation/testing/user-stories/10us.png) |
 | 11 | User | Receive order confirmation and status emails | Stay updated on my purchases | Email notifications sent via Django’s email backend when orders are placed or updated. | [Order Email](documentation/testing/user-stories/11us.png) |
-| 12 | Admin | Access the Django admin panel | Manage backend operations and data | Django admin enabled for superusers with full access to models and data. | [Admin Panel](documentation/testing/user-stories/12us.png) |
-| 13 | Admin | Add, edit, or remove products | Keep the store's inventory up to date | Admin interface supports CRUD operations on products and categories. | [Admin Product Management](documentation/testing/user-stories/13us.png) |
-| 14 | Admin | Manage customer orders | Fulfill purchases efficiently | Order management views in admin show order details and allow status updates. | [Admin Order Management](documentation/testing/user-stories/14us.png) |
-| 15 | Admin | View and manage user data | Provide support and resolve issues | User data and profiles accessible through admin for support tasks. | [Admin User Management](documentation/testing/user-stories/15us.png) |
-| 16 | All | View the site on mobile/tablet devices | Shop comfortably on any screen | Responsive design using Bootstrap 4 adapts layout for all screen sizes. | [Responsive View](documentation/testing/user-stories/16us.png) |
+| 12 | User | Create a wishlist | Save items for later purchase | Custom `Wishlist` and `WishlistItem` models let users add/remove products from their wishlist and view them on the Wishlist page. | [Wishlist](documentation/feautures/wishlist.png) |
+| 13 | User | See my recently viewed items | Quickly return to products I looked at earlier | Custom `RecentlyViewed` model tracks product detail views per user and displays the latest items on the profile page. | [Recently Viewed](documentation/feautures/recently-viewed.png) |
+| 14 | Admin | Access the Django admin panel | Manage backend operations and data | Django admin enabled for superusers with full access to models and data. | [Admin Panel](documentation/testing/user-stories/12us.png) |
+| 15 | Admin | Add, edit, or remove products | Keep the store's inventory up to date | Admin interface supports CRUD operations on products and categories. | [Admin Product Management](documentation/testing/user-stories/13us.png) |
+| 16 | Admin | Manage customer orders | Fulfill purchases efficiently | Order management views in admin show order details and allow status updates. | [Admin Order Management](documentation/testing/user-stories/14us.png) |
+| 17 | Admin | View and manage user data | Provide support and resolve issues | User data and profiles accessible through admin for support tasks. | [Admin User Management](documentation/testing/user-stories/15us.png) |
+| 18 | All | View the site on mobile/tablet devices | Shop comfortably on any screen | Responsive design using Bootstrap 4 adapts layout for all screen sizes. | [Responsive View](documentation/testing/user-stories/16us.png) |
 
 ### Full Testing
 
@@ -188,6 +256,20 @@ Additional testing was carried out by friends and family on a variety of devices
 | Add to Basket Button | Adds selected product/size to basket | Clicked Add to Basket | Product added to basket | Pass |
 | Edit Product (Superuser) | Opens edit form for product | Clicked Edit | Taken to product edit form | Pass |
 | Delete Product (Superuser) | Deletes product after confirmation | Clicked Delete and confirmed | Product removed | Pass |
+
+| **Wishlist Page** |
+| Feature | Expected Functionality | Test Action | Result | Status |
+| --- | --- | --- | --- | --- |
+| Wishlist Display | Shows all saved items | Visited wishlist page | Items shown correctly | Pass |
+| Remove Item | Removes product from wishlist | Clicked Remove | Item removed | Pass |
+| View Product | Opens product detail page | Clicked product | Redirected correctly | Pass |
+
+| **Recently Viewed** |
+| Feature | Expected Functionality | Test Action | Result | Status |
+| --- | --- | --- | --- | --- |
+| Automatically Track Views | Adds product to model when viewed | Visited product page | Item appears in list | Pass |
+| Limit to 10 Items | Only show last 10 products | Viewed 12 products | Oldest 2 removed | Pass |
+| Product Link | Opens product detail | Clicked recently viewed item | Redirected correctly | Pass |
 
 | **Profile Page** |
 | Feature | Expected Functionality | Test Action | Result | Status |
