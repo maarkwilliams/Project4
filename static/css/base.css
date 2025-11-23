@@ -6,11 +6,11 @@ body {
     color: #555;
     font-family: 'Lato';
     min-height: 100vh;
-    background: none !important;
+    background: none;
 }
 
 .no-background {
-    background: none !important;
+    background: none;
 }
 
 .icon {

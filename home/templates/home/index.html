@@ -5,10 +5,10 @@
 
 {% block extra_css %}
 <style>
-.homepage-background {
+body.homepage-background {
     background: url("{{ MEDIA_URL }}homepage_background.jpg")
-                no-repeat center center fixed;
-    background-size: cover;
+                no-repeat center center fixed !important;
+    background-size: cover !important;
 }
 </style>
 {% endblock %}
@@ -22,7 +22,6 @@
 {% endblock page_header %}
 
 {% block content %}
-<p>MEDIA_URL DEBUG: {{ MEDIA_URL }}</p>
 
 <div class="container h-100">
     <div class="row h-100">
