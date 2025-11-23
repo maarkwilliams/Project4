@@ -412,10 +412,6 @@ As Nothing Special evolves, there are several exciting features planned to enhan
 
 * Advanced Product Filtering: Add more detailed filters such as size, colour, price range, brand, and style to help users find products that match their preferences quickly and easily.
 
-* Wishlist and Favorites: Allow users to save products to wishlists or favourites for later viewing, improving user retention and purchase intent.
-
-* Product Reviews and Ratings: Expand the review system to include verified purchase badges, image uploads with reviews, and sorting options by rating or date to enhance trust and decision-making.
-
 * Order Tracking and Notifications: Integrate real-time order tracking and automated notifications for order confirmation, shipping updates, and delivery status to improve transparency and customer satisfaction.
 
 * Personalised Recommendations: Develop machine learning-driven product recommendations based on user behaviour, purchase history, and browsing patterns to increase sales and user engagement.

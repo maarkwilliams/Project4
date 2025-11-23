@@ -30,10 +30,16 @@ class ProductModelTests(TestCase):
         """
         Test average_rating returns the correct calculated value.
         """
-        user = User.objects.create_user(
-            username="tester",
+
+        user1 = User.objects.create_user(
+            username="tester1",
             password="pass123",
         )
+        user2 = User.objects.create_user(
+            username="tester2",
+            password="pass123",
+        )
+
         product = Product.objects.create(
             name="Test Product",
             category=self.category,
@@ -42,12 +48,12 @@ class ProductModelTests(TestCase):
 
         Review.objects.create(
             product=product,
-            user=user,
+            user=user1,
             rating=4,
         )
         Review.objects.create(
             product=product,
-            user=user,
+            user=user2,
             rating=2,
         )
 
